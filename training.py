@@ -3,8 +3,9 @@ from random import sample
 
 import keras.backend.tensorflow_backend as tfback
 from keras import backend
-import eli5
-from eli5.sklearn import PermutationImportance
+#import eli5
+#from eli5.sklearn import PermutationImportance
+import sklearn
 
 def _get_available_gpus():
 	"""Get a list of available gpu devices (formatted as strings).
@@ -30,22 +31,23 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-out", help="Filename to write model to", required=True)
 parser.add_argument("-ts", help="Tree sequences prefix to load", required=True)
 #parser.add_argument("-ts_sim", help="Tree sequence file to load", required=True)
-parser.add_argument("-nn", help="The numder of nodes towards the root to traverse up the tree", required=False, default=4)
+parser.add_argument("-nn", help="The numder of nodes towards the root to traverse up the tree", required=False, default=5)
 args = parser.parse_args()
 
+num_seq=5
 samples={}
-samples[0]=["GBR", 0, 182, 400000, 200000]
-samples[1]=["Bronze_Age", 182, 344,400000, 200000]
-samples[2]=["BAA", 344,358,100000, 50000]
-samples[3]=["Neo", 358, 660,200000, 100000]
-samples[4]=["Yam", 660,685,100000, 100000]
+samples[0]=["GBR", 0, 182, 100000*num_seq, 50000*num_seq]
+samples[1]=["Bronze_Age", 182, 344,100000*num_seq, 50000*num_seq]
+samples[2]=["BAA", 344,358,25000*num_seq, 12500*num_seq]
+samples[3]=["Neo", 358, 660,50000*num_seq, 25000*num_seq]
+samples[4]=["Yam", 660,685,25000*num_seq, 25000*num_seq]
 print(len(samples))
 
-counts=np.zeros((650000,(9*int(args.nn))), dtype=float)
-labels=np.zeros((650000), dtype=int)
+counts=np.zeros((162500*num_seq,(9*int(args.nn))), dtype=float)
+labels=np.zeros((162500*num_seq), dtype=int)
 
 t_num=0
-for tseq in range(2):
+for tseq in range(5):
 	ts_rel=tskit.load(str(args.ts)+"_relate_popsize_"+str(tseq)+".trees")
 	ts_sim=tskit.load(str(args.ts)+"_"+str(tseq)+".trees")
 	num_trees=ts_rel.get_num_trees()
@@ -53,7 +55,7 @@ for tseq in range(2):
 	print("Number of sites=",num_sites, file=sys.stderr)
 	print("Number of trees in tree sequence =", ts_rel.get_num_trees(), file=sys.stderr)
 	for samset in range(5):
-		num_examples=(samples[samset][3]+10000)/2 #Number of places we need to visit in each tseq
+		num_examples=(samples[samset][3]+10000)/num_seq #Number of places we need to visit in each tseq
 		num_samples=samples[samset][2]-samples[samset][1] 
 		split=num_examples/num_samples #Number of places within each sample
 		step=math.floor(num_sites/split) #The step in sites visited
@@ -62,10 +64,10 @@ for tseq in range(2):
 		print(num_samples, file=sys.stderr)
 		print(num_examples, file=sys.stderr)
 		print(step, file=sys.stderr)
-		progress_bar=tqdm.tqdm(total=(samples[samset][4])/2)
+		progress_bar=tqdm.tqdm(total=round((samples[samset][4])/num_seq))
 		counter_list=[0]*6
 
-		while sum(counter_list)<(samples[samset][4])/2:	
+		while sum(counter_list)<round((samples[samset][4])/num_seq):	
 			print("step=", step, file=sys.stderr)
 			tree_sim=ts_sim.first()
 			for tree_rel in ts_rel.trees():
@@ -96,9 +98,9 @@ for tseq in range(2):
 							path=1
 						
 						if samples[samset][0]=="BAA":
-							if counter_list[path-1]==(25000/2):
+							if counter_list[path-1]>=(6250):
 								continue
-						elif counter_list[path-1]==(50000/2):
+						elif counter_list[path-1]>=(12500):
 							continue
 				
 						counter_list[path-1]+=1
@@ -152,11 +154,11 @@ for tseq in range(2):
 						########### Next trees
 						t_num+=1
 						progress_bar.update()
-						if sum(counter_list)==(samples[samset][4])/2 :
+						if sum(counter_list)>=round((samples[samset][4])/num_seq) :
 							break
-					if sum(counter_list)==(samples[samset][4])/2:
+					if sum(counter_list)>=round((samples[samset][4])/num_seq):
 						break
-				if sum(counter_list)==(samples[samset][4])/2:
+				if sum(counter_list)>=round((samples[samset][4])/num_seq):
 					print("breaking", file=sys.stderr)
 					break
 			step=step+(step/2)
