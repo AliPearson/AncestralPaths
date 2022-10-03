@@ -1,2 +1,4 @@
 # AncestralPaths
-## Toy example with small tree sequence, maybe two paths example.
+## Code of local path ancestry assignment of European genomes. 
+## From simulation, through training, testing and painting
+
