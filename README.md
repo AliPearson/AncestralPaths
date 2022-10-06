@@ -34,8 +34,17 @@ where:
 - <population_ages_file> is the file specifying the population and ages of each sample described above
 - <path_to_relate> is the relative path the the RELATE module
 
-# Ouput 
+### Ouput 
 
+Two diretories, *simulated_files* and *relate_files* contain the output tree sequences, VCFs and associated files for simulating and constructing RELATE genealogies. 
+
+The model_*output*.h5 is the trained classifier that is used to paint real chromosomes in the next step. 
+
+The results from testing the classifier in the form of confusion matrices are saved. One for each population as *output*_*population*_confusion.txt, and one total confusion matrix when pooling all testing data from all populations, *output*_confusion.txt.
+
+An array containing the accuracy scores per population (rows), per tree sequence tested (coloumns) is saved in *output*.kfold.log. 
+
+#Painting
 
 
 

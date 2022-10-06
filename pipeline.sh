@@ -12,7 +12,7 @@ cd ../
 
 #Simulate
 echo Simulating
-python simulate.py -out ${output}/${output} -ages ${ages} > simulate.log
+python simulate.py -out ${output}/${output} -ages ${ages} > ${output}/simulate.log
 
 num_seqs=10
 echo $num_seqs
