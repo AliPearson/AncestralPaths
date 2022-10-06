@@ -51,4 +51,10 @@ To use the trained classifier on real data requires tree sequences to be constru
 ```
 python paint.py -ts <chromosome.trees> -model <path_to_output_files/model.h5> -nn <number_of_nodes> -poplab <poplabels_file> -out <output_prefix>
 ```
+
+The <poplabels_file> is the same as that used in the RELATE inference and must have the same population labels as in the <population_ages_file> used for classifier training. 
+
+The output of this is a *painted.npz file. This is an array with dimensions N x S x 3, where N = number of trees and S = number of samples. For each tree and each samples there is a path label, the softmax value for that assignment and the right genomic position of the tree intervals across the chromosome. 
+
+
  
