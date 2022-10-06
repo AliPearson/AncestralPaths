@@ -1,10 +1,13 @@
 #!/bin/bash
 
 output=$1
+ages=$2
+path_to_relate=$3
+map=$4
 
 #Simulate
 echo Simulating
-python simulate.py -out ${output} -ages mesoneo_ages_pop.txt
+python simulate.py -out ${output} -ages ${ages}
 
 num_seqs=10
 echo $num_seqs
@@ -12,7 +15,7 @@ echo Running Relate
 #Run Relate
 for ((i=0; i<num_seqs; i++)); do
 	echo $i
-	./relate.sh $output $i &
+	./relate.sh $output $i ${path_to_relate} ${map} &
 done
 wait
 

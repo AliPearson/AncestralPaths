@@ -17,21 +17,21 @@ with open(args.ages, 'r') as sample_times:
 	for line in sample_times:
 		line=line.strip()
 		field=line.split('\t')
-		if field[2]=="Bronze_Age":
+		if field[0]=="Bronze_Age":
 			bronze_times.append(int(field[1]))
-		if field[2]=="BAA":
+		if field[0]=="BAA":
 			baa_times.append(int(field[1]))
-		if field[2]=="Yam":
+		if field[0]=="Yam":
 			yam_times.append(int(field[1]))
-		if field[2]=="Neo":
+		if field[0]=="Neo":
 			neo_times.append(int(field[1]))
-		if field[2]=="WHG":
+		if field[0]=="WHG":
 			whg_times.append(int(field[1]))
-		if field[2]=="EHG":
+		if field[0]=="EHG":
 			ehg_times.append(int(field[1]))
-		if field[2]=="CHG":
+		if field[0]=="CHG":
 			chg_times.append(int(field[1]))
-		if field[2]=="Ana":
+		if field[0]=="Ana":
 			ana_times.append(int(field[1]))	
 
 #initial population sizes:
