@@ -44,8 +44,11 @@ The results from testing the classifier in the form of confusion matrices are sa
 
 An array containing the accuracy scores per population (rows), per tree sequence tested (coloumns) is saved in *output*.kfold.log. 
 
-#Painting
+# Painting
 
+To use the trained classifier on real data requires tree sequences to be constructed for each chromosome needing to be painted first. This can be done in a way that is best for the data at hand, following the guidelines and suggestions in the RELATE documentation. Once tree sequences have been constructed, each chromosome can be painted with the command: 
 
-
+```
+python paint.py -ts <chromosome.trees> -model <path_to_output_files/model.h5> -nn <number_of_nodes> -poplab <poplabels_file> -out <output_prefix>
+```
  

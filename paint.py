@@ -164,6 +164,6 @@ for t, tree in enumerate(ts.trees()):
 	results[t,:,2]=tree.interval.right
 	all_nodes(tree, samples, results)
 	progress_bar.update()
-np.savez_compressed(args.out, paths=results)
+np.savez_compressed(str(args.out)+"_painted.npz", paths=results)
 progress_bar.close()
 
