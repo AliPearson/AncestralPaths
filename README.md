@@ -14,14 +14,21 @@ The code present here is for creating a classifier trained on a model of Europea
 
 ## Requirements
 
-The code requires RELATE to by installed. Follow the installation intructions can be found in the [documentation](https://myersgroup.github.io/relate/).
+The code requires RELATE to by installed. Follow the installation intructions can be found in the [documentation](https://myersgroup.github.io/relate/). RELATE requires that genomes are phased.
 
 The admixture times analysis require R version 4 or later.  
 
-## Input files
+## Input
 
-To specify the number and ages of each sample to simulate and train over a sample ages file is required. This should be a two column file, tab separated, with the population label and age in units of generations, one line per sample. The population labels should be one of *present_day, Bronze_Age, Neo, Yam, WHG, EHG, CHG, Ana, BAA*, caps-sensitive. The are populations from the model of European population structure. The figure below describes the relationships of these ancient groups and present day Europeans. ![Europe](Model_schematic.pdf).
+To specify the number and ages of each sample to simulate and train over a sample ages file is required. This should be a two column file, tab separated, with the population label and age in units of generations, one line per sample. The population labels should be one of *present_day, Bronze_Age, Neo, Yam, WHG, EHG, CHG, Ana, BAA*, caps-sensitive. The are populations from the model of European population structure. This ![figure](Model_schematic.pdf) describes the relationships of these ancient groups and present day Europeans. Ancient genomes from all of these groups are publically available.
 
+## Usage
+
+The run the simulation, through training and testing of a classifier over a speicified number of samples:
+
+```
+./pipeline.sh <output_prefix> <population_ages_file> <path_to_relate>
+```
 
 
  

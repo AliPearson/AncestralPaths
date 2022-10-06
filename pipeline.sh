@@ -3,7 +3,6 @@
 output=$1
 ages=$2
 path_to_relate=$3
-map=$4
 
 #Simulate
 echo Simulating
@@ -15,7 +14,7 @@ echo Running Relate
 #Run Relate
 for ((i=0; i<num_seqs; i++)); do
 	echo $i
-	./relate.sh $output $i ${path_to_relate} ${map} &
+	./relate.sh $output $i ${path_to_relate} &
 done
 wait
 
