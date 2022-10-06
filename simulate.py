@@ -17,25 +17,22 @@ with open(args.ages, 'r') as sample_times:
 	for line in sample_times:
 		line=line.strip()
 		field=line.split('\t')
-		if field[0]=="Bronze_Age":
+		if field[2]=="Bronze_Age":
 			bronze_times.append(int(field[1]))
-		if field[0]=="BAA":
+		if field[2]=="BAA":
 			baa_times.append(int(field[1]))
-		if field[0]=="Yam":
+		if field[2]=="Yam":
 			yam_times.append(int(field[1]))
-		if field[0]=="Neo":
+		if field[2]=="Neo":
 			neo_times.append(int(field[1]))
-		if field[0]=="WHG":
+		if field[2]=="WHG":
 			whg_times.append(int(field[1]))
-		if field[0]=="EHG":
+		if field[2]=="EHG":
 			ehg_times.append(int(field[1]))
-		if field[0]=="CHG":
+		if field[2]=="CHG":
 			chg_times.append(int(field[1]))
-		if field[0]=="Ana":
+		if field[2]=="Ana":
 			ana_times.append(int(field[1]))	
-print(max(bronze_times), sep=' ')
-
-
 
 #initial population sizes:
 N_bronze = 50000
@@ -58,8 +55,6 @@ T_baa = max(baa_times)+1
 T_near_east = 800
 T_europe = 600
 T_basal = 1500
-
-print("Neo time=", T_neo)
 
 demography = msprime.Demography()
 demography.add_population(name="present_bronze", initial_size=N_present) #0
@@ -114,34 +109,40 @@ for time in whg_times:
 for time in ehg_times:
 	EHG_samples.append(msprime.SampleSet(1, time=time, population="EHG", ploidy=2))
 
-print(bronze_samples)
 samples = present_sample + bronze_samples + Baa_samples + neolithic_samples + Yam_samples + WHG_samples + EHG_samples + Ana_samples + CHG_samples  #Can multiply each by the number of samples needed for each population
 
 demography.sort_events()
 print(demography.debug())
 graph=demography.to_demes()
-demes.dump(graph, str(args.ts)+".yaml")
+demes.dump(graph, str(args.out)+".yaml")
 
 #Simulate chromosome 3 only
-tree_sequence_rep = msprime.sim_ancestry(num_replicates=3, recombination_rate=1e-8, demography=demography,samples=samples, sequence_length=200000000)
+tree_sequence_rep = msprime.sim_ancestry(num_replicates=10, recombination_rate=1e-8, demography=demography,samples=samples, sequence_length=2000000)
 
 
 for j, tree_sequence in enumerate(tree_sequence_rep):
 	ts=msprime.sim_mutations(tree_sequence, rate=1.25e-8)
-	name=str(args.ts)+"_"+str(j)+".trees"
+	name=str(args.out)+"_"+str(j)+".trees"
 	ts.dump(name)
  #Saving tree.sequence object to desired directory
-	with open(str(args.ts)+"_"+str(j)+".vcf", "w") as vcf_file:
+	with open(str(args.out)+"_"+str(j)+".vcf", "w") as vcf_file:
 		ts.write_vcf(vcf_file)
 
 ages=tree_sequence.tables.nodes.time[0:tree_sequence.get_sample_size()]
-np.savetxt(str(args.ts)+".ages", ages)
+np.savetxt(str(args.out)+".ages", ages)
 
-poplab=open(str(args.ts)+".poplabels", 'w')
-pops=tree_sequence.tables.nodes.population
+poplab=open(str(args.out)+".poplabels", 'w')
+nodes=tree_sequence.tables.nodes
+pop_names=tree_sequence.tables.populations
 print("sample", "population","group", "sex", sep=' ', file=poplab)
 for i in range(int(tree_sequence.get_sample_size()/2)):
-	print("tsk_"+str(i), pops[i*2], pops[i*2], "NA", sep=' ', file=poplab)
+	if nodes.population[(i*2)]==0:
+		if nodes.time[(i*2)]==0:
+			print("tsk_"+str(i), "present_day", "present_day", "NA", sep=' ', file=poplab)
+		else:
+			print("tsk_"+str(i), "Bronze_Age", "Bronze_Age", "NA", sep=' ', file=poplab)
+	else:
+		print("tsk_"+str(i), pop_names[nodes.population[(i*2)]].metadata['name'], pop_names[nodes.population[(i*2)]].metadata['name'], "NA", sep=' ', file=poplab)
 poplab.close()
 
 

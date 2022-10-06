@@ -30,18 +30,60 @@ from keras.layers import Convolution2D, MaxPooling2D
 parser = argparse.ArgumentParser()
 parser.add_argument("-out", help="Filename to write model to", required=True)
 parser.add_argument("-ts", help="Tree sequences prefix to load", required=True)
-#parser.add_argument("-ts_sim", help="Tree sequence file to load", required=True)
+parser.add_argument("-poplab", help="Population labels file to load", required=True)
 parser.add_argument("-nn", help="The numder of nodes towards the root to traverse up the tree", required=False, default=5)
 args = parser.parse_args()
 
+samples_pops={}
+with open(args.poplab, 'r') as poplab:
+	i=0
+	for line in poplab:
+		if (line.startswith("sample")):
+			continue
+		line=line.strip()
+		field=line.split(' ')
+		ind_1=(i*2)
+		ind_2=ind_1+1
+		if str(field[1])=="Bronze_Age":
+			samples_pops[int(ind_1)]=0
+			samples_pops[int(ind_2)]=0
+		elif str(field[1])=="BAA":
+			samples_pops[int(ind_1)]=1
+			samples_pops[int(ind_2)]=1
+		elif str(field[1])=="Yam":
+			samples_pops[int(ind_1)]=2
+			samples_pops[int(ind_2)]=2
+		elif str(field[1])=="Neo":
+			samples_pops[int(ind_1)]=3
+			samples_pops[int(ind_2)]=3
+		elif str(field[1])=="WHG":	
+			samples_pops[int(ind_1)]=4
+			samples_pops[int(ind_2)]=4
+		elif str(field[1])=="EHG":
+			samples_pops[int(ind_1)]=5
+			samples_pops[int(ind_2)]=5
+		elif str(field[1])=="Ana":
+			samples_pops[int(ind_1)]=6
+			samples_pops[int(ind_2)]=6
+		elif str(field[1])=="CHG":
+			samples_pops[int(ind_1)]=7
+			samples_pops[int(ind_2)]=7
+		else:
+			samples_pops[int(ind_1)]=8
+			samples_pops[int(ind_2)]=8
+		i+=1
+
+samples_inv={}
+for k, v in samples_pops.items():
+	samples_inv[v] = samples_inv.get(v, []) + [k]
+	
 num_seq=5
 samples={}
-samples[0]=["GBR", 0, 182, 100000*num_seq, 50000*num_seq]
-samples[1]=["Bronze_Age", 182, 344,100000*num_seq, 50000*num_seq]
-samples[2]=["BAA", 344,358,25000*num_seq, 12500*num_seq]
-samples[3]=["Neo", 358, 660,50000*num_seq, 25000*num_seq]
-samples[4]=["Yam", 660,685,25000*num_seq, 25000*num_seq]
-print(len(samples))
+samples[0]=["present_day", 0, max(samples_inv[8])+1, 100000*num_seq, 50000*num_seq]
+samples[1]=["Bronze_Age", min(samples_inv[0]), max(samples_inv[0])+1,100000*num_seq, 50000*num_seq]
+samples[2]=["BAA", min(samples_inv[1]),max(samples_inv[1])+1,25000*num_seq, 12500*num_seq]
+samples[3]=["Neo", min(samples_inv[3]), max(samples_inv[3])+1,50000*num_seq, 25000*num_seq]
+samples[4]=["Yam", min(samples_inv[2]), max(samples_inv[2])+1,25000*num_seq, 25000*num_seq]
 
 counts=np.zeros((162500*num_seq,(9*int(args.nn))), dtype=float)
 labels=np.zeros((162500*num_seq), dtype=int)
@@ -114,7 +156,7 @@ for tseq in range(5):
 							if (parent_rel==-1): ##Checking for root node
 								break
 					
-							total={leaves for leaves in tree_rel.leaves(parent_rel) if leaves>=182 and leaves not in leaves_previous}
+							total={leaves for leaves in tree_rel.leaves(parent_rel) if leaves>=int(samples[0][2]) and leaves not in leaves_previous}
 							if (len(total)==0): #If no leaves are from the ancestral groups then move to the next node
 								parent_rel=tree_rel.parent(parent_rel)
 								continue
@@ -125,24 +167,9 @@ for tseq in range(5):
 							counts[t_num][8+(9*v)]+=age_norm
 
 							add=float(1/len(total)) #Normalised so it is robust to sample size
-							for leaves in total:
-								leaves_previous.add(leaves)
-								if (leaves<=343): #Bronze age
-									counts[t_num][(9*v)]+=add
-								elif (leaves<=357): #BAA
-									counts[t_num][1+(9*v)]+=add
-								elif (leaves<=659): #Neolithic
-									counts[t_num][3+(9*v)]+=add
-								elif (leaves<=685): #Yam
-									counts[t_num][2+(9*v)]+=add
-								elif (leaves<=787): #WHG
-									counts[t_num][4+(9*v)]+=add
-								elif (leaves<=873): #EHG
-									counts[t_num][5+(9*v)]+=add
-								elif (leaves<=923): #Anatolian
-									counts[t_num][6+(9*v)]+=add
-								elif (leaves<=951): #CHG
-									counts[t_num][7+(9*v)]+=add
+							for leaf in total:
+								leaves_previous.add(leaf)
+								counts[t_num][(9*v)+samples_pops[leaf]]+=add
 							parent_rel=tree_rel.parent(parent_rel) #Traverse up the tree to the next node
 							v+=1
 
@@ -167,8 +194,8 @@ for tseq in range(5):
 		print("counter_list=", *counter_list, file=sys.stderr)
 		print("sum counter list=", sum(counter_list), file=sys.stderr)
 
-np.savetxt("training_"+str(args.out)+"_relate_GNNs.txt", counts)
-np.savetxt("training_"+str(args.out)+"_sim_labels.txt", labels)
+#np.savetxt("training_"+str(args.out)+"_relate_GNNs.txt", counts)
+#np.savetxt("training_"+str(args.out)+"_sim_labels.txt", labels)
 
 ################### Classifier training
 print("training classifier", file=sys.stderr)
