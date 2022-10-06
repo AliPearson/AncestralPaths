@@ -20,7 +20,7 @@ The admixture times analysis require R version 4 or later.
 
 ## Input files
 
-To specify the number and ages of each sample to simulate and train over a sample ages file is required. This should be a two column file, tab separated, with the population label and age in units of generations, one line per sample. The population labels should be one of *present_day, Bronze_Age, Neo, Yam, WHG, EHG, CHG, Ana, BAA*, caps-sensitive. The are populations from the model of European population structure. The figure below describes the relationships of these ancient groups and present day Europeans. ![](Model_schematic.pdf).
+To specify the number and ages of each sample to simulate and train over a sample ages file is required. This should be a two column file, tab separated, with the population label and age in units of generations, one line per sample. The population labels should be one of *present_day, Bronze_Age, Neo, Yam, WHG, EHG, CHG, Ana, BAA*, caps-sensitive. The are populations from the model of European population structure. The figure below describes the relationships of these ancient groups and present day Europeans. ![Europe](Model_schematic.pdf).
 
 
 
