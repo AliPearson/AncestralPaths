@@ -3,8 +3,6 @@ from random import sample
 
 import keras.backend.tensorflow_backend as tfback
 from keras import backend
-#import eli5
-#from eli5.sklearn import PermutationImportance
 import sklearn
 
 def _get_available_gpus():
@@ -194,8 +192,6 @@ for tseq in range(5):
 		print("counter_list=", *counter_list, file=sys.stderr)
 		print("sum counter list=", sum(counter_list), file=sys.stderr)
 
-#np.savetxt("training_"+str(args.out)+"_relate_GNNs.txt", counts)
-#np.savetxt("training_"+str(args.out)+"_sim_labels.txt", labels)
 
 ################### Classifier training
 print("training classifier", file=sys.stderr)

@@ -101,7 +101,6 @@ for hap in range(0,(num_samples*2),2):
 					got_it=True
 					break
 				except:
-					#print("no fit", cut)
 					continue
 			if got_it:
 				results=np.array(results_r)
@@ -123,7 +122,6 @@ for hap in range(0,(num_samples*2),2):
 					got_it=True
 					break
 				except:
-					#print("no fit", cut)
 					continue
 			if got_it:
 				results=np.array(results_r)
@@ -148,7 +146,6 @@ for hap in range(0,(num_samples*2),2):
 					got_it=True
 					break
 				except:
-					#print("no fit", cut)
 					continue
 			if got_it:
 				results=np.array(results_r)

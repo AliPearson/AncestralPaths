@@ -35,9 +35,7 @@ where:
 
 ### Ouput 
 
-Two diretories, *simulated_files* and *relate_files* contain the output tree sequences, VCFs and associated files for simulating and constructing RELATE genealogies.
-
-The simulation produces a *output*.yaml file which describes the simulated demographic structure. 
+Two diretories, *simulated_files* and *relate_files* contain the output tree sequences, VCFs and associated files for simulating and constructing RELATE genealogies. 
 
 The model_*output*.h5 is the trained classifier that is used to paint real chromosomes in the next step. 
 

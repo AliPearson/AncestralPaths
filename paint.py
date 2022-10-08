@@ -89,8 +89,6 @@ def all_nodes(tree, samples, results):
 			age_norm=float(age)/1500
 			counts[sam_rel,8+(9*v)]=age_norm
 
-				#if len(total)==0:
-				#	continue
 ##Finding the GNN distributions and the age of nodes
 			add=float(1/len(total))
 			leaves_previous.update(total)

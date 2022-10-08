@@ -3,9 +3,6 @@ from random import sample
 
 import keras.backend.tensorflow_backend as tfback
 from keras import backend
-#import eli5
-#from eli5.sklearn import PermutationImportance
-#from sklearn.metrics import scorer
 
 def _get_available_gpus():
 	"""Get a list of available gpu devices (formatted as strings).
@@ -97,7 +94,6 @@ X_test_pool=np.zeros((50000, 1,5,9,5))
 labels_test_pool=np.zeros((50000,5))
 for ts_num,tseq in enumerate(range(5,10)):
 	print("TREE SEQUENCE", tseq)
-	#t_num=0
 	counts=np.zeros((10000,5,(9*int(args.nn))), dtype=float)
 	labels=np.zeros((10000,5), dtype=int)
 	
@@ -214,21 +210,14 @@ for ts_num,tseq in enumerate(range(5,10)):
 		data = X_train.reshape(X_train.shape[0], 1,5,9)
 		lab_target=keras.utils.to_categorical(labels[:,samset]-1, 6)
 	
-		#if tseq==0:
-		#	X_test_pool[:,:,:,:,samset]=data
-		#	labels_test_pool=(labels-1)
-		#else:
 		X_test_pool[(ts_num*10000):((ts_num*10000)+10000),:,:,:,samset]=data
 		labels_test_pool[(ts_num*10000):((ts_num*10000)+10000),samset]=labels[:,samset]-1
-		#np.vstack((X_test_pool, data))
-		#np.append(labels_test_pool, (labels-1))
 
 		scores = model.evaluate(data, lab_target, verbose=0)
 		print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 		classes=model.predict_classes(data, batch_size = 128)
 		print(np.where((labels-1)<0))
 		print(tf.math.confusion_matrix(classes, labels[:,samset]-1))
-		#np.savetxt(str(args.out)+str(samples[samset][0])+"_confusion.txt", tf.math.confusion_matrix(classes, labels[:,samset]-1))
 		cvscores[ts_num,samset]=(scores[1] * 100)
 
 print(cvscores)
