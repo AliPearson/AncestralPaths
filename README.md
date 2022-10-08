@@ -61,6 +61,7 @@ The admixture time analysis estimates both the admixture time and fractions of t
 
 ```
 python admixture.py -poplab <poplabels_file> -out <output_prefix> -samples <sample_order> [-ints <list_of_interval_filenames> | -intsf <file_of interval_filenames>]
+```
 
 The <poplabels_file> and <sample_order> are the same as for painting above. There is a choice between options -ints where a list of intervals filenames are passed or -intsf where a text file containing the interval filenames, one on each line, is passed. 
 
