@@ -62,11 +62,11 @@ python paint.py
 
 The <poplabels_file> is the same as that used in the RELATE inference and must have the same population labels as in the <population_ages_file> used for classifier training. The <sample_order> is a file with the names of the samples in the correct order. This can be produced from the VCF file using bcftools or from the .sample file used in RELATE inference. It is needed to determine the correct sample order and should be one sample name per line. The map file is the genetic map file for the corresponding chromosome.  
 
-The output of this is 1. a *painted.npz file. This is an array with dimensions N x S x 3, where N = number of trees and S = number of **haploid** samples. For each tree and each samples there is a path label, the softmax value for that assignment and the right genomic position of the tree intervals across the chromosome. 2. 
+The output of this is 1. a *output*_painted.npz file. This is an array with dimensions N x S x 3, where N = number of trees and S = number of **haploid** samples. For each tree and each samples there is a path label, the softmax value for that assignment and the right genomic position of the tree intervals across the chromosome. 2. 
 
-The *intervals.npz file is an N x S x 4 array. For each sample and each tree, the interval in bp the tree spans in columns 1 and 2, the path label in column 3, the genetic distance of the right hand edge the tree reaches along the chromosome in column 3 and the softmax value in column 4. This file is used as input to the admixture analysis.
+The *output*_intervals.npz file is an N x S x 4 array. For each sample and each tree, the interval in bp the tree spans in columns 1 and 2, the path label in column 3, the genetic distance of the right hand edge the tree reaches along the chromosome in column 3 and the softmax value in column 4. This file is used as input to the admixture analysis.
 
-The painting.R script can be used to visualize individual painted haploid chromosomes by passing the intervals file loaded as an array in R and the haploid sample number to plot.
+The painting.R script can be used to visualize individual painted haploid chromosomes by passing the *output*_intervals.npz file loaded as an array in R and the haploid sample number to plot.
 
 ## Admixture time and fraction analysis
 
