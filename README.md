@@ -44,17 +44,26 @@ The results from testing the classifier in the form of confusion matrices are sa
 
 An array containing the accuracy scores per population (rows), per tree sequence tested (coloumns) is saved in *output*.kfold.log. 
 
-# Painting
+## Painting
 
 To use the trained classifier on real data requires tree sequences to be constructed for each chromosome needing to be painted first. This can be done in a way that is best for the data at hand, following the guidelines and suggestions in the RELATE documentation. Once tree sequences have been constructed, each chromosome can be painted with the command: 
 
 ```
-python paint.py -ts <chromosome.trees> -model <path_to_output_files/model.h5> -nn <number_of_nodes> -poplab <poplabels_file> -out <output_prefix>
+python paint.py -ts <chromosome.trees> -model <path_to_output_files/model.h5> -nn <number_of_nodes> -poplab <poplabels_file> -sample <sample_order> -out <output_prefix> -map <genetic_map> 
 ```
 
-The <poplabels_file> is the same as that used in the RELATE inference and must have the same population labels as in the <population_ages_file> used for classifier training. 
+The <poplabels_file> is the same as that used in the RELATE inference and must have the same population labels as in the <population_ages_file> used for classifier training. The <sample_order> is a file with the names of the samples in the correct order. This can be produced from the VCF file using bcftools or from the .sample file used in RELATE inference. It is needed to determine the correct sample order and should be one sample name per line. The map file is the genetic map file for the corresponding chromosome.  
 
-The output of this is a *painted.npz file. This is an array with dimensions N x S x 3, where N = number of trees and S = number of samples. For each tree and each samples there is a path label, the softmax value for that assignment and the right genomic position of the tree intervals across the chromosome. 
+The output of this is 1. a *painted.npz file. This is an array with dimensions N x S x 3, where N = number of trees and S = number of samples. For each tree and each samples there is a path label, the softmax value for that assignment and the right genomic position of the tree intervals across the chromosome. 2. The *intervals.npz file contains, for each sample and each tree, the interval in bp the tree spans in columns 1 and 2, the path label in column 3, the genetic distance of the right hand edge the tree reaches along the chromosome in column 3 and the softmax value in column 4. This file is used as input to the admixture analysis.  
 
+## Admixture time and fraction analysis
 
+The admixture time analysis estimates both the admixture time and fractions of the admixed populations *Neo, Yam, Bronze_Age* and *present_day*. Run the command. 
+
+```
+python admixture.py -poplab <poplabels_file> -out <output_prefix> -samples <sample_order> [-ints <list_of_interval_filenames> | -intsf <file_of interval_filenames>]
+
+The <poplabels_file> and <sample_order> are the same as for painting above. There is a choice between options -ints where a list of intervals filenames are passed or -intsf where a text file containing the interval filenames, one on each line, is passed. 
+
+The output of this command is two files. A *output*.times.npz file and a *output*.fractions.npz file. Both are arrays of N x 2 x 2 dimensions where N is the number of diploid samples. For each diploid sample there are two estimates of the admixture time/fraction, one from each of the two admixing ancestries and an associated standard error.    
  

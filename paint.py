@@ -6,6 +6,7 @@ import keras.backend.tensorflow_backend as tfback
 from keras import backend
 from numpy import loadtxt
 from keras.models import load_model
+from find_nearest import find_nearest
 
 def _get_available_gpus():
 	"""Get a list of available gpu devices (formatted as strings).
@@ -27,11 +28,13 @@ backend.set_image_data_format('channels_first')
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-out", help="Filename to write training matrix to ", required=True)
-parser.add_argument("-model",help="name of the NN model",required=True)
+parser.add_argument("-out", help="Filename prefix to wite paths to", required=True)
+parser.add_argument("-model",help="Name of the NN model",required=True)
 parser.add_argument("-ts", help="Tree sequence file to load", required=True)
 parser.add_argument("-poplab", help="File of population labels", required=True)
-parser.add_argument("-nn", help="Number of nodes to traverse up to", required=True)
+parser.add_argument("-nn", help="Number of nodes to traverse up to", required=False, default=5)
+parser.add_argument("-samples", help="File containing sample order", required=True)
+parser.add_argument("-map", help="Genetic map file", required=True)
 args = parser.parse_args()
 
 #############################3
@@ -43,6 +46,8 @@ num_muts=ts.get_num_mutations()
 print("Number of sites=",num_sites)
 print("Number of mutations=",num_muts)
 print("Number of trees in tree sequence =", ts.get_num_trees())
+
+map = pd.read_csv(args.map, delimiter = "\t")
 
 #############################
 def all_nodes(tree, samples, results):
@@ -107,7 +112,7 @@ def all_nodes(tree, samples, results):
 
 ###################################
 sam_order=[]
-with open("sams_order.txt", 'r') as sams_ordered:
+with open(args.sample, 'r') as sams_ordered:
 	for line in sams_ordered:
 		line=line.strip()
 		sam_order.append(line)
@@ -159,11 +164,26 @@ num_samples=len(list(ts.samples()))
 print(num_samples)
 ##############################
 results=np.zeros((num_trees,num_samples,3),dtype=float)
+length_dist = np.zeros((num_samples, 5, num_trees), dtype=float)
 progress_bar = tqdm.tqdm(total=num_trees)
 for t, tree in enumerate(ts.trees()):
-	results[t,:,2]=tree.interval.right
+	iv=tree.interval.right
+	results[t,:,2]=iv
 	all_nodes(tree, samples, results)
+	if t==0:
+		length_dist[:,0,t]=0
+	else:
+		length_dist[:, 0, t] = length_dist[:,1,t-1]
+	if(iv < map["Position(bp)"][0]):
+		continue
+	map_row=map.iloc[find_nearest(map['Position(bp)'], iv),:]
+	x=(((float(iv) - float(map_row["Position(bp)"]))/1000000)*float(map_row["Rate(cM/Mb)"]))+float(map_row["Map(cM)"])
+	length_dist[:,3,t] = x
+	for sample in range(num_samples):
+		path=results[t,sample,0]
+		softmax=results[t,sample,1]
 	progress_bar.update()
 np.savez_compressed(str(args.out)+"_painted.npz", paths=results)
+np.savez_compressed(str(args.out)+"_intervals.npz", length_dist)
 progress_bar.close()
 

@@ -39,8 +39,8 @@ mv *.annot relate_files
 mv ${output}_relate* relate_files
 mv ${output}*.vcf simulated_files
 mv ${output}*.trees simulated_files
-#mv ${output}.ages simulated_files
-#mv ${output}.poplabels simulated_files
+mv ${output}.ages simulated_files
+mv ${output}.poplabels simulated_files
 mv genetic_map* simulated_files
 mv relate.log relate_files
 mv simulate.log simulated_files
