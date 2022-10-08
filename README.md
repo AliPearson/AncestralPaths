@@ -1,6 +1,6 @@
 # AncestralPaths
 
-AncestralPaths is a local ancestry painting technique based on genealogies produced by [RELATE](https://myersgroup.github.io/relate/). The method aims to assign 'path' ancestries to segments of chromosomes the decribe the path back through a population history that segment has taken. Steps of the method as as follows:
+AncestralPaths is a local ancestry painting technique based on genealogies produced by [RELATE](https://myersgroup.github.io/relate/). The method aims to assign 'path' ancestries to segments of chromosomes the decribe the path back through a population history that segment has taken. This code is based on a model of the population history of Europeans described in this ![figure](Model_schematic.pdf), but the code can be adapted to different populaiton histories. Steps of the method as as follows:
 
 1. Simulate chromosomes from the model of European population structure.
 2. Run Relate on simulated data.
