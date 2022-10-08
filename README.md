@@ -64,7 +64,9 @@ The <poplabels_file> is the same as that used in the RELATE inference and must h
 
 The output of this is 1. a *painted.npz file. This is an array with dimensions N x S x 3, where N = number of trees and S = number of **haploid** samples. For each tree and each samples there is a path label, the softmax value for that assignment and the right genomic position of the tree intervals across the chromosome. 2. 
 
-The *intervals.npz file is an N x S x 4 array. For each sample and each tree, the interval in bp the tree spans in columns 1 and 2, the path label in column 3, the genetic distance of the right hand edge the tree reaches along the chromosome in column 3 and the softmax value in column 4. This file is used as input to the admixture analysis.  
+The *intervals.npz file is an N x S x 4 array. For each sample and each tree, the interval in bp the tree spans in columns 1 and 2, the path label in column 3, the genetic distance of the right hand edge the tree reaches along the chromosome in column 3 and the softmax value in column 4. This file is used as input to the admixture analysis.
+
+The painting.R script can be used to visualize individual painted haploid chromosomes by passing the intervals file loaded as an array in R and the haploid sample number to plot.
 
 ## Admixture time and fraction analysis
 
