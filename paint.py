@@ -110,7 +110,7 @@ def all_nodes(tree, samples, results):
 
 ###################################
 sam_order=[]
-with open(args.sample, 'r') as sams_ordered:
+with open(args.samples, 'r') as sams_ordered:
 	for line in sams_ordered:
 		line=line.strip()
 		sam_order.append(line)
