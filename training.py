@@ -1,9 +1,8 @@
-import msprime, sys, argparse, csv, itertools, math, random, numpy as np, tqdm, tskit, tensorflow as tf, keras, sys
-from random import sample
+import sys, argparse, itertools, math, numpy as np, tqdm, tskit, tensorflow as tf
 
-import keras.backend.tensorflow_backend as tfback
+from tensorflow import keras
+import keras.backend as tfback
 from keras import backend
-import sklearn
 
 def _get_available_gpus():
 	"""Get a list of available gpu devices (formatted as strings).
@@ -17,10 +16,6 @@ def _get_available_gpus():
 		tfback._LOCAL_DEVICES = [x.name for x in devices]
 	return [x for x in tfback._LOCAL_DEVICES if 'device:gpu' in x.lower()]
 	
-tfback._get_available_gpus = _get_available_gpus
-tfback._get_available_gpus()
-tf.config.list_logical_devices()
-backend.set_image_data_format('channels_first')
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
@@ -28,66 +23,23 @@ from keras.layers import Convolution2D, MaxPooling2D
 parser = argparse.ArgumentParser()
 parser.add_argument("-out", help="Filename to write model to", required=True)
 parser.add_argument("-ts", help="Tree sequences prefix to load", required=True)
-parser.add_argument("-poplab", help="Population labels file to load", required=True)
-parser.add_argument("-nn", help="The numder of nodes towards the root to traverse up the tree", required=False, default=5)
+parser.add_argument("-nn", help="The numder of nodes towards the root to traverse up the tree", required=False, default=4)
 args = parser.parse_args()
 
-samples_pops={}
-with open(args.poplab, 'r') as poplab:
-	i=0
-	for line in poplab:
-		if (line.startswith("sample")):
-			continue
-		line=line.strip()
-		field=line.split(' ')
-		ind_1=(i*2)
-		ind_2=ind_1+1
-		if str(field[1])=="Bronze_Age":
-			samples_pops[int(ind_1)]=0
-			samples_pops[int(ind_2)]=0
-		elif str(field[1])=="BAA":
-			samples_pops[int(ind_1)]=1
-			samples_pops[int(ind_2)]=1
-		elif str(field[1])=="Yam":
-			samples_pops[int(ind_1)]=2
-			samples_pops[int(ind_2)]=2
-		elif str(field[1])=="Neo":
-			samples_pops[int(ind_1)]=3
-			samples_pops[int(ind_2)]=3
-		elif str(field[1])=="WHG":	
-			samples_pops[int(ind_1)]=4
-			samples_pops[int(ind_2)]=4
-		elif str(field[1])=="EHG":
-			samples_pops[int(ind_1)]=5
-			samples_pops[int(ind_2)]=5
-		elif str(field[1])=="Ana":
-			samples_pops[int(ind_1)]=6
-			samples_pops[int(ind_2)]=6
-		elif str(field[1])=="CHG":
-			samples_pops[int(ind_1)]=7
-			samples_pops[int(ind_2)]=7
-		else:
-			samples_pops[int(ind_1)]=8
-			samples_pops[int(ind_2)]=8
-		i+=1
-
-samples_inv={}
-for k, v in samples_pops.items():
-	samples_inv[v] = samples_inv.get(v, []) + [k]
-	
-num_seq=5
+num_seq=3
 samples={}
-samples[0]=["present_day", 0, max(samples_inv[8])+1, 100000*num_seq, 50000*num_seq]
-samples[1]=["Bronze_Age", min(samples_inv[0]), max(samples_inv[0])+1,100000*num_seq, 50000*num_seq]
-samples[2]=["BAA", min(samples_inv[1]),max(samples_inv[1])+1,25000*num_seq, 12500*num_seq]
-samples[3]=["Neo", min(samples_inv[3]), max(samples_inv[3])+1,50000*num_seq, 25000*num_seq]
-samples[4]=["Yam", min(samples_inv[2]), max(samples_inv[2])+1,25000*num_seq, 25000*num_seq]
+samples[0]=["GBR", 0, 182, 100000*num_seq, 50000*num_seq]
+samples[1]=["Bronze_Age", 182, 344,100000*num_seq, 50000*num_seq]
+samples[2]=["BAA", 344,358,25000*num_seq, 12500*num_seq]
+samples[3]=["Neo", 358, 660,50000*num_seq, 25000*num_seq]
+samples[4]=["Yam", 660,686,25000*num_seq, 25000*num_seq]
+print(len(samples))
 
 counts=np.zeros((162500*num_seq,(9*int(args.nn))), dtype=float)
 labels=np.zeros((162500*num_seq), dtype=int)
 
 t_num=0
-for tseq in range(5):
+for tseq in [3,5,6]:
 	ts_rel=tskit.load(str(args.ts)+"_relate_popsize_"+str(tseq)+".trees")
 	ts_sim=tskit.load(str(args.ts)+"_"+str(tseq)+".trees")
 	num_trees=ts_rel.get_num_trees()
@@ -154,7 +106,7 @@ for tseq in range(5):
 							if (parent_rel==-1): ##Checking for root node
 								break
 					
-							total={leaves for leaves in tree_rel.leaves(parent_rel) if leaves>=int(samples[0][2]) and leaves not in leaves_previous}
+							total={leaves for leaves in tree_rel.leaves(parent_rel) if leaves>=182 and leaves not in leaves_previous}
 							if (len(total)==0): #If no leaves are from the ancestral groups then move to the next node
 								parent_rel=tree_rel.parent(parent_rel)
 								continue
@@ -165,9 +117,24 @@ for tseq in range(5):
 							counts[t_num][8+(9*v)]+=age_norm
 
 							add=float(1/len(total)) #Normalised so it is robust to sample size
-							for leaf in total:
-								leaves_previous.add(leaf)
-								counts[t_num][(9*v)+samples_pops[leaf]]+=add
+							for leaves in total:
+								leaves_previous.add(leaves)
+								if (leaves<=343): #Bronze age
+									counts[t_num][(9*v)]+=add
+								elif (leaves<=357): #BAA
+									counts[t_num][1+(9*v)]+=add
+								elif (leaves<=659): #Neolithic
+									counts[t_num][3+(9*v)]+=add
+								elif (leaves<=685): #Yam
+									counts[t_num][2+(9*v)]+=add
+								elif (leaves<=787): #WHG
+									counts[t_num][4+(9*v)]+=add
+								elif (leaves<=873): #EHG
+									counts[t_num][5+(9*v)]+=add
+								elif (leaves<=923): #Anatolian
+									counts[t_num][6+(9*v)]+=add
+								elif (leaves<=951): #CHG
+									counts[t_num][7+(9*v)]+=add
 							parent_rel=tree_rel.parent(parent_rel) #Traverse up the tree to the next node
 							v+=1
 
@@ -192,23 +159,22 @@ for tseq in range(5):
 		print("counter_list=", *counter_list, file=sys.stderr)
 		print("sum counter list=", sum(counter_list), file=sys.stderr)
 
+np.savetxt("training_"+str(args.out)+"_relate_GNNs.txt", counts)
+np.savetxt("training_"+str(args.out)+"_sim_labels.txt", labels)
 
 ################### Classifier training
 print("training classifier", file=sys.stderr)
 X_train=counts
-X_train = X_train.reshape(X_train.shape[0], 1,5,9)
+X_train = X_train.reshape(X_train.shape[0], 5,9)
 print(X_train.shape, file=sys.stderr)
 print(labels.shape, file=sys.stderr)
 
 lab_train_target=keras.utils.to_categorical(labels-1, 6)
-model = Sequential()
-model.add(Convolution2D(32, (5,1), activation='relu', input_shape=(1,5,9)))
-model.add(Flatten())
-model.add(Dense(units=64, activation='relu'))
-model.add(Dense(units=6, activation='softmax'))
+model = tf.keras.models.Sequential([tf.keras.layers.Flatten(input_shape=(5, 9)),tf.keras.layers.Dense(512, activation=tf.nn.relu),tf.keras.layers.Dropout(0.2),tf.keras.layers.Dense(6, activation=tf.nn.softmax)])
 model.summary()
+model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-model.fit(X_train, lab_train_target ,batch_size=30, nb_epoch=5, verbose=1)
+model.fit(X_train, lab_train_target, epochs=5)
 name="model_"+str(args.out)+str(".h5")
 model.save(name)
 
